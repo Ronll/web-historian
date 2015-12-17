@@ -26,21 +26,16 @@ exports.initialize = function(pathsObj) {
 // modularize your code. Keep it clean!
 
 exports.readListOfUrls = function(callback) {
+
   fs.readFile(exports.paths.list, 'utf8', function (err, urls) {
     var urlsArray = urls.split("\n");
     callback(urlsArray);
     // console.log('\nstart\n', index.length, '\n end of sites.txt');
   });
-
-  
-
-  //fs.dir --> go through each file 
-  //return content of site.txt
-  //expecting it to match the test array of urls
 };
 
 exports.isUrlInList = function(url, callback) {
-
+  
   exports.readListOfUrls(function(urlsArray) {
       var counter = 0;
       for (var i = 0; i<urlsArray.length; i++) {
@@ -68,14 +63,14 @@ exports.addUrlToList = function(url, callback) {
           console.log("there was an error");
         } else {
           console.log("success!", url + '\n');
-          callback(err, content)
+          callback();
           // fs.readFile(__dirname + '/../test/testdata/sites.txt', 'utf8', function (err, index) {
           //   console.log('\nstart\n', index.length, '\n end of sites.txt');
           // });
         }
       });
     } else {
-      callback(err)
+      callback();
     } 
   });
   //if isURLInList() returns false
@@ -83,15 +78,45 @@ exports.addUrlToList = function(url, callback) {
   //otherwise do nothing
 };
 
-exports.isUrlArchived = function() {
-
-  //if URL is in directory
-    //return true
-  //else
-    //return false
+exports.isUrlArchived = function(url, callback) {
+  exports.isUrlInList(url, function(is) {
+    if (is) {
+      var counter = 0;
+      fs.readFile(exports.paths.archivedSites, 'utf8', function (err, urls) {
+        var urlsArray = urls.split("\n");
+        for (var i = 0; i<urlsArray.length; i++) {
+          if (url === urlsArray[i]) {
+            counter ++;
+            callback(true);
+          }
+        }
+        if (counter === 0) {
+          callback(false);
+        }
+      });
+    } else {
+      callback(false);
+    }
+  });
 };
 
-exports.downloadUrls = function() {
-  //if isURLArchived returns true
-    //display archived URL
+exports.downloadUrls = function(urls) {
+
+  for (var i = 0; i<urls.length; i++) {
+    exports.isUrlArchived(urls[i], function(exists) {
+      if (exists) {
+        //add to archived sites directory
+        fs.writeFile(exports.paths.archivedSites + "/" + urls[i], urls[i], function (err){
+          if (err) {
+            console.log("there was an error");
+          } else {
+            console.log("success!", urls[i] + '\n');
+            fs.appendFile
+
+          }
+        });
+
+      }
+    });
+  }
 };
