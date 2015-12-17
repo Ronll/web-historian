@@ -39,6 +39,9 @@ describe("server", function() {
         // Write data to the file.
         fs.writeFileSync(fixturePath, "google");
 
+        //fs.readFile('/Users/student/Documents/2015-11-web-historian/test/testdata/sites.txt', function(err, file){
+        //  console.log(file.toString())
+        //});
         request
           .get("/" + fixtureName)
           .expect(200, /google/, function (err) {
