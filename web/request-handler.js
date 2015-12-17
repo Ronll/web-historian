@@ -20,9 +20,9 @@ exports.handleRequest = function (req, res) {
       console.log(files, 'error:', err);
       var counter = 0;
       files.forEach(function (file) {
-        if( file === site){
+        if (file === site) {
           counter++;
-          fs.readFile(__dirname + '/../test/testdata/sites/' +  file, function(err, siteHTML) {
+          fs.readFile(__dirname + '/../test/testdata/sites/' + file, function (err, siteHTML) {
             res.writeHead(200, headers.headers);
             res.write(siteHTML);
             res.end();
@@ -40,43 +40,57 @@ exports.handleRequest = function (req, res) {
     return result;
   };
 
-  if(req.method === 'GET') {
-    if(req.url === '/') {
+  if (req.method === 'GET') {
+    if (req.url === '/') {
       fs.readFile(__dirname + '/public/index.html', 'utf8', function (err, index) {
         res.writeHead(200, headers.headers);
         res.write(index);
         res.end();
       });
     }
-    else{
+    else {
       var site = handleSiteRequest(req.url.substring(1));
 
     }
-  } else if (req.method === 'POST', function(data) {
+  } else if (req.method === 'POST') {
+    var data = [];
+    req.on('data', function (chunk) {
+      data.push(chunk);
+    });
+
+    req.on('end', function () {
+      data = Buffer.concat(data).toString();
+      data = data.substring(4);
+      console.log("data is ", data.length, typeof data);
+
 
       fs.readdir(__dirname + '/../test/testdata/sites', function (err, files) {
         var counter = 0;
         files.forEach(function (file) {
-          if( file === data){
+          if (file === data) {
             counter++;
           }
-        })
-        if (counter === 0) {
+        });
+        console.log(counter, 'counter')
+
           //We need to add the full site url to site.text
-          fs.appendFile(__dirname + '/../test/testdata/sites.txt', data, function(err) {
-            console.log(__dirname + '/../test/testdata/sites.txt')
-            console.log('site', req.url.substring(1))
+          fs.appendFile( __dirname + '/../test/testdata/sites.txt', data + '\n', function (err) {
             if (err) {
               console.log("there was an error");
-            }else {
-              console.log("success!")
+            } else {
+              console.log("success!", data + '\n');
+                fs.readFile(__dirname + '/../test/testdata/sites.txt', 'utf8', function (err, index) {
+                  console.log('\nstart\n', index.length, '\n end of sites.txt')
+                })
             }
-          })
+          });
           //Notify user by switching the loading file
-        }
-
       })
-    }) {
+    });
+
+    res.writeHead(302, headers.headers);
+    res.end();
+
 
   }
 
