@@ -1,6 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
+var request = require('request');
 
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
@@ -103,19 +104,31 @@ exports.isUrlArchived = function(url, callback) {
 exports.downloadUrls = function(urls) {
 
   for (var i = 0; i<urls.length; i++) {
+    console.log("In the for loop", urls[i]);
+    var url = urls[i];
     exports.isUrlArchived(urls[i], function(exists) {
-      if (exists) {
+      if (!exists) {
         //add to archived sites directory
-        fs.writeFile(exports.paths.archivedSites + "/" + urls[i], urls[i], function (err){
+        fs.open(exports.paths.archivedSites + "/" + url, "w", function(err, fd) {
           if (err) {
             console.log("there was an error");
           } else {
-            console.log("success!", urls[i] + '\n');
-            fs.appendFile
-
+            console.log("Created a file! testing", url);
+            request("http://" + url, function(err, response, body) {
+              console.log("2222222", err);
+              if (!err) {
+                console.log("33333333");
+                fs.writeFile(exports.paths.archivedSites + "/" + url + "\n", body, function(err) {
+                  if (err) {
+                    console.log("adding html failed");
+                  } else {
+                    console.log("adding HTML succeeded!");
+                  }
+                });
+              }
+            });
           }
         });
-
       }
     });
   }
