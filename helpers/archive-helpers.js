@@ -29,7 +29,7 @@ exports.readListOfUrls = function(callback) {
   fs.readFile(exports.paths.list, 'utf8', function (err, urls) {
     var urlsArray = urls.split("\n");
     callback(urlsArray);
-    console.log('\nstart\n', index.length, '\n end of sites.txt');
+    // console.log('\nstart\n', index.length, '\n end of sites.txt');
   });
 
   
@@ -39,7 +39,20 @@ exports.readListOfUrls = function(callback) {
   //expecting it to match the test array of urls
 };
 
-exports.isUrlInList = function() {
+exports.isUrlInList = function(url, callback) {
+
+  exports.readListOfUrls(function(urlsArray) {
+      var counter = 0;
+      for (var i = 0; i<urlsArray.length; i++) {
+        if (url === urlsArray[i]) {
+          counter++;
+          callback(true);
+        }
+      }
+      if (counter === 0) {
+        callback(false); 
+      }
+  });
   //readListOfUrls --> returns the site.txt
   //traverse through this list of urls
   //if argument matches url
@@ -47,13 +60,31 @@ exports.isUrlInList = function() {
   //else return false
 };
 
-exports.addUrlToList = function() {
+exports.addUrlToList = function(url, callback) {
+  exports.isUrlInList(url, function(is) {
+    if (!is) {
+      fs.appendFile(exports.paths.list, url + '\n', 'utf8', function (err, content){
+        if (err) {
+          console.log("there was an error");
+        } else {
+          console.log("success!", url + '\n');
+          callback(err, content)
+          // fs.readFile(__dirname + '/../test/testdata/sites.txt', 'utf8', function (err, index) {
+          //   console.log('\nstart\n', index.length, '\n end of sites.txt');
+          // });
+        }
+      });
+    } else {
+      callback(err)
+    } 
+  });
   //if isURLInList() returns false
     //appendFile to sites.txt
   //otherwise do nothing
 };
 
 exports.isUrlArchived = function() {
+
   //if URL is in directory
     //return true
   //else
